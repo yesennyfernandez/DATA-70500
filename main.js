@@ -18,31 +18,51 @@ let state = {
 
 /* LOAD DATA */
 // + SET YOUR DATA PATH
-d3.csv('../data/data1.csv', d => {
+d3.csv('../data/DV-NYPD-Radiorun.csv', d => {
   
   const formattedObj = {
     Borough: d.Borough,
-    Count: +d.Count,
-    year: new Date(+d.Year) // (year, month, day)
+    RadioRuns: +d.RadioRuns,
+    Year: new Date(+d.Year, 0, 1), // (year, month, day)
+    Year2:+d.Year
   }
   return formattedObj
 })
-  .then(data => {
+  //.then(data => {
+   // console.log("loaded data:", data);
+    //sorting
+    //function sortByBoroughDateAscending(a, b){
+    //return a.Borough.localCompare(b.Borough) || a.Year - b.Year;
+   //data = data.sort(sortByBoroughDateAscending);
+      // console.log("sorted data:", data);
+    //state.data = data;
+    //init();
+ // });
+
+   .then(data => {
     console.log("loaded data:", data);
+    
+    function sortByDateAscending(a, b) {
+
+      return a.Year - b.Year;
+  } data = data.sort(sortByDateAscending);
+  console.log("sorted data:", data);
+  
     state.data = data;
     init();
   });
+
 
 /* INITIALIZING FUNCTION */
 // this will be run *one time* when the data finishes loading in
 function init() {
 // SCALES
 xScale = d3.scaleTime()
-.domain(d3.extent(state.data, d=> d.year))
+.domain(d3.extent(state.data, d=> d.Year))
 .range([margin.left, width - margin.right])
 
 yScale = d3.scaleLinear()
-.domain(d3.extent(state.data, d=> d.Count)) // [min, max]
+.domain(d3.extent(state.data, d=> d.RadioRuns)) // [min, max]
 .range([height-margin.bottom, margin.top])
 
 // AXES
@@ -97,20 +117,20 @@ function draw() {
   .filter(d=> state.selection === d.Borough)
 
   yScale
-  .domain(d3.extent(filteredData, d=> d.Count))
+  .domain(d3.extent(filteredData, d=> d.RadioRuns))
 
   // + DRAW LINE AND/OR AREA
   const lineFunction = d3.line()
-    .x(d=> xScale(d.year))
-    .y(d=> yScale(d.Count))
+    .x(d=> xScale(d.Year))
+    .y(d=> yScale(d.RadioRuns))
 
   svg.selectAll("path.line")
     .data([filteredData])
     .join("path")
     .attr("class", "line")
     .attr("fill", "none")
-    .attr("stroke", "black")
-    .attr("d", lineFunction)
+    .attr("stroke", "Purple")
+    .attr("d", d =>lineFunction(d))
 
   // SELECT_ALL()
   // JOIN DATA
